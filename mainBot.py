@@ -12,14 +12,12 @@ from longpoll import poll
 from commandsParsing import parseText
 
 import time
-import datetime
 import json
 
 bot = Bot("703271301450305b8b94947068")
 NAME = "Sarah"
 GROUP_ID = "29961146" #"20505137"
 AVATAR_URL = "https://i.groupme.com/1920x1080.jpeg.6141b043a4844c3584ad2ef2db520a99"
-
 
 with open("rude.json", mode = 'r') as r:
     rude = json.loads(r.readline())

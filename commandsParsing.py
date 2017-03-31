@@ -11,10 +11,14 @@ import time
 
 def respondHelp():
     return """Here is a list of commands I respond to: 
-             -h, --help
+             -h,  --help
              |        Get a list of commands.
-             -q, --quote [PATTERN]
-             |        Get a random professor quote.""";
+             -q,  --quote [PATTERN='']
+             |        Get a random professor quote.
+             -su, --shutup [TIME=60]
+             |        Turn off all messages for TIME seconds.
+             -sw, --swear [TIME=60]
+             |        Turn on the swear filter for TIME seconds.""";
         
 def respondQuote(message):
     if "--quote" in message:
@@ -51,7 +55,20 @@ def respondShutUp(message):
     time.sleep(min(secs,3600))
     return "I was quiet for %s seconds."%secs
 
+def respondAlive():
+    return "Still alive."
 
+def respondSwearFilter(message):
+    with open("rude.json") as r:
+        rude = json.loads(r.readline())
+    arr = message.split()
+    clean = message
+    for g in arr:
+        if g.lower() in rude:
+            index = clean.find(g)
+            clean = clean[:index] + rude[g.lower()] + clean[index + len(g):]
+    return clean
+            
 
 def parseText(message):
     if "--help" in message or "-h" in message:
@@ -60,5 +77,9 @@ def parseText(message):
         return respondQuote(message)
     if "--shutup" in message or "-su" in message:
         return respondShutUp(message)
+    if "--alive" in message or "-a" in message:
+        return respondAlive()
+    if "--swear" in message:
+        return respondSwearFilter(message)
     return None
         
