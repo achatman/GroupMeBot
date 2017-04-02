@@ -76,5 +76,11 @@ while True:
         else:
             respond(ret)
     except requests.exceptions.ConnectionError:
-        print("Connection Error")
+        print("Connection Error.", "Reconnecting in 60 seconds...", end = ' ')
+        for i in range(0,60):
+            if i % 10 == 0:
+                print("%s seconds..."%(60-i),end = ' ')
+            time.sleep(1)
+        print('')
+        
     

@@ -47,7 +47,7 @@ while(True):
                     print("Cleaned message.")
             actions.remove(g)
     loop_counter+=1
-    if loop_counter > 10:
-        print(len(actions))
+    if loop_counter > 60:
+        print(time.ctime(),"Actions Pending: " + len(actions))
         loop_counter = 0
     time.sleep(2)
