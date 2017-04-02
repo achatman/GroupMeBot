@@ -68,6 +68,7 @@ def respond(message):
     if not senderType == "bot":
         parseText(messageText)
 
+waitTime = 30
 while True:
     try:
         ret = waitForMessage()
@@ -76,11 +77,10 @@ while True:
         else:
             respond(ret)
     except requests.exceptions.ConnectionError:
-        print("Connection Error.", "Reconnecting in 60 seconds...", end = ' ')
-        for i in range(0,60):
-            if i % 10 == 0:
-                print("%s seconds..."%(60-i),end = ' ')
-            time.sleep(1)
+        print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
+        for i in range(0,3):
+            print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
+            time.sleep(waitTime/3)
         print('')
         
     

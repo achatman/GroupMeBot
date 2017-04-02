@@ -20,7 +20,8 @@ def swearSuggestion(message):
 
 lastModified = os.path.getmtime("actions.json")
 actions = []
-loop_counter = 0
+loop_counter = 120 #Starts high to create output immediately
+actions_executed = 0
 while(True):
     if os.path.getmtime("actions.json") > lastModified:
         with open("actions.json", mode = 'r') as r:
@@ -45,9 +46,10 @@ while(True):
                 if BOT.swear_switch:
                     BOT.sendText(swearSuggestion(g["message"]))
                     print("Cleaned message.")
+            actions_executed+=1
             actions.remove(g)
     loop_counter+=1
     if loop_counter > 60:
-        print(time.ctime(),"Actions Pending: " + len(actions))
+        print(time.ctime(),"Actions Executed: " + str(actions_executed),"Actions Pending: " + str(len(actions)), sep='; ')
         loop_counter = 0
-    time.sleep(2)
+    time.sleep(10)
