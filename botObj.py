@@ -16,6 +16,8 @@ class Bot(object):
         self.__strTypeCheck(ID,"ID")
         self.id = ID
         self.url = "https://api.groupme.com/v3/bots/post"
+        self.shutup_switch = False
+        self.swear_switch = False
         
     def sendText(self,string):
         self.__strTypeCheck(string,"string")
@@ -161,11 +163,3 @@ class Bot(object):
             print("Longitude: " + lng)
             print("Latitude: " + lat)
             print("Name: " + name)
-    
-def loadJson(filepath):
-    with open(filepath, mode = 'r') as r:
-        bots = json.loads(r.readline())
-    out = []
-    for g in bots:
-        out.append(Bot(bots[g]['bot_id']))
-    return out;
