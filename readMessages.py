@@ -12,6 +12,7 @@ from commandsParsing import parseText
 
 import time
 import json
+import requests
 
 
 GROUP_ID = "29961146" #"20505137"
@@ -68,8 +69,12 @@ def respond(message):
         parseText(messageText)
 
 while True:
-    ret = waitForMessage()
-    if ret == None:
-        break;
-    else:
-        respond(ret)
+    try:
+        ret = waitForMessage()
+        if ret == None:
+            break;
+        else:
+            respond(ret)
+    except requests.exceptions.ConnectionError:
+        print("Connection Error")
+    
