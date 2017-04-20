@@ -15,11 +15,12 @@ def handshake(ID):
         {
             "channel": "/meta/handshake",
             "version": "1.0",
-            "supportedConnectionTypes": ["long-polling"],
+            "supportedConnectionTypes": ["websocket"],
             "id": str(ID)
         }
     ]
     r = requests.post(fayeURL, json = handshake)
+    print(json.dumps(r.json(), indent = 4))
     if(r.status_code != 200):
         print("Handshake: ",r.status_code, r.reason)
         print(json.dumps(r.json(),sort_keys=True, indent = 4))

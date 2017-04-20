@@ -48,6 +48,7 @@ def waitForMessage():
         ret = poll(ID,sig)
         ID+=1
         if ret != None:
+            print(json.dumps(ret, indent = 4))
             return ret
         else:
             print("Timeout. ID: ", ID)

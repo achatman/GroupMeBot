@@ -10,6 +10,8 @@ import random
 import time
 
 NAME = "Sarah"
+with open("options.json") as r:
+    opts = json.loads(r.readline())
 
 #types: text, flag, pass
 def writeAction(data):
@@ -58,15 +60,21 @@ def getArguments(text,pattern,numArgs):
     return args;
 
 def respondHelp():
-    writeText( """Here is a list of commands I respond to: 
-             -h,  --help
-             |        Get a list of commands.
-             -q,  --quote [PATTERN='']
-             |        Get a random professor quote.
-             -su, --shutup [TIME=60]
-             |        Turn off all messages for TIME seconds.
-             -sw, --swear [TIME=60]
-             |        Turn on the swear filter for TIME seconds.""")
+    bulletChar = "*"
+    out = 'Here is a list of commands I respond to:\n'
+    for g in range(0,len(opts)):
+        flags = bulletChar.ljust(3) + opts[g]["short"] + ','
+        flags = flags.ljust(7)
+        flags += opts[g]["long"]
+        for h in range(0,len(opts[g]["options"])):
+            flags += " [%s=%s]"%(opts[g]["options"][h]["name"], opts[g]["options"][h]["default"])
+        out += flags + '\n'
+        out += (bulletChar*2).ljust(6) + opts[g]["desc"]
+        for h in range(0,len(opts[g]["options"])):
+            out += '\n'
+            out += (bulletChar*3).ljust(9) + opts[g]["options"][h]["name"] + ' - ' + opts[g]["options"][h]["desc"]
+        out += '\n'
+    return out;
         
 def respondQuote(message):
     if "--quote" in message:
