@@ -15,7 +15,7 @@ def handshake(ID):
         {
             "channel": "/meta/handshake",
             "version": "1.0",
-            "supportedConnectionTypes": ["websocket"],
+            "supportedConnectionTypes": ["long-polling"],
             "id": str(ID)
         }
     ]
