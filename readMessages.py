@@ -22,8 +22,56 @@ with open("rude.json", mode = 'r') as r:
     rude = json.loads(r.readline())
 
 ID = 1
-startTime = int(time.time())
 
+def connect():
+    global ID;
+    sig = handshake(ID)
+    print("Connected")
+    ID += 1
+    userchannel(ID,sig)
+    print("Subscribed to Channel")
+    ID += 1
+    return sig;
+    
+def process(response):
+    #alert = response["data"]["alert"]
+    messageType = response["data"]["type"]
+    #groupid = response["data"]["subject"]["group_id"]
+    #senderid= response["data"]["subject"]["sender_id"]
+    messageText = response["data"]["subject"]["text"]
+    senderType = response["data"]["subject"]["sender_type"]
+    #senderName = response["data"]["subject"]["name"]
+    
+    if messageType != "line.create":
+        print("Type: " + messageType)
+        return;
+    
+    if senderType != "bot":
+        parseText(messageText)
+
+sig = connect()
+connectTime = int(time.time())
+reconnect = 300
+while True:
+    if int(time.time()) > connectTime + reconnect:
+        sig = connect()
+        connectTime = int(time.time())
+        reconnect = 300
+    print("Polling...")
+    ret = poll(ID,sig)
+    ID += 1
+    timeout = ret[0]["advice"]["timeout"]
+    reconnect += int(timeout) / 1000
+    if len(ret[1]["data"]) > 1:
+        process(ret[1])
+        print("Event Processed.")
+    else:
+        print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
+    
+    
+
+
+'''
 def connect():
     global ID;
     sig = handshake(ID)
@@ -83,5 +131,4 @@ while True:
             print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
             time.sleep(waitTime/3)
         print('')
-        
-    
+'''

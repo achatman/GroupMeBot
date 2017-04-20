@@ -20,12 +20,13 @@ def handshake(ID):
         }
     ]
     r = requests.post(fayeURL, json = handshake)
-    print(json.dumps(r.json(), indent = 4))
     if(r.status_code != 200):
         print("Handshake: ",r.status_code, r.reason)
         print(json.dumps(r.json(),sort_keys=True, indent = 4))
     #returns signature
+    #print(json.dumps(r.json(),indent = 4))
     return r.json()[0]["clientId"]
+    
 
 def userchannel(ID,sig):
     userChannel = [
@@ -42,6 +43,7 @@ def userchannel(ID,sig):
         }
     ]
     r = requests.post(fayeURL, json = userChannel)
+    #print(json.dumps(r.json(),indent = 4))
     if(r.status_code != 200):
         print("User Channel: ",r.status_code, r.reason)
         print(json.dumps(r.json(),sort_keys=True, indent = 4))
@@ -59,9 +61,5 @@ def poll(ID,sig):
     if (r.status_code != 200):
         print("Poll: ",r.status_code, r.reason)
         print(json.dumps(r.json(),sort_keys=True, indent = 4))
-    #Returns message information if message, else None
-    if len(r.json()[1]["data"]) > 1:
-        return r.json()[1]
-    else:
-        return None
-    
+    #print(json.dumps(r.json(), indent = 4))
+    return r.json()
