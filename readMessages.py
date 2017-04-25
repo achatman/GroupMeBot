@@ -52,22 +52,29 @@ def process(response):
 sig = connect()
 connectTime = int(time.time())
 reconnect = 300
+waitTime = 30
 while True:
-    if int(time.time()) > connectTime + reconnect:
-        sig = connect()
-        connectTime = int(time.time())
-        reconnect = 300
-    print("Polling...")
-    ret = poll(ID,sig)
-    ID += 1
-    timeout = ret[0]["advice"]["timeout"]
-    reconnect += int(timeout) / 1000
-    if len(ret[1]["data"]) > 1:
-        process(ret[1])
-        print("Event Processed.")
-    else:
-        print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
-    
+    try:
+        if int(time.time()) > connectTime + reconnect:
+            sig = connect()
+            connectTime = int(time.time())
+            reconnect = 300
+        print("Polling...")
+        ret = poll(ID,sig)
+        ID += 1
+        timeout = ret[0]["advice"]["timeout"]
+        reconnect += int(timeout) / 1000
+        if len(ret[1]["data"]) > 1:
+            process(ret[1])
+            print("Event Processed.")
+        else:
+            print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
+    except requests.exceptions.ConnectionError:
+        print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
+        for i in range(0,3):
+            print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
+            time.sleep(waitTime/3)
+        print('')
     
 
 
