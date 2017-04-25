@@ -9,6 +9,7 @@ from longpoll import handshake
 from longpoll import userchannel
 from longpoll import poll
 from commandsParsing import parseText
+from commandsParsing import respondStatus
 
 import time
 import json
@@ -47,6 +48,9 @@ def process(response):
         return;
     
     if senderType != "bot":
+        #respondStatus is called directly to allow more parameters to be passed
+        if "--status" in messageText or "-s" in messageText:
+            respondStatus(messageText, ID, reconnect - int(time.time() - connectTime), connectTime)
         parseText(messageText)
 
 sig = connect()
@@ -63,7 +67,7 @@ while True:
         ret = poll(ID,sig)
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
-        reconnect += int(timeout) / 1000
+        reconnect = int(timeout) / 1000
         if len(ret[1]["data"]) > 1:
             process(ret[1])
             print("Event Processed.")
@@ -78,7 +82,7 @@ while True:
     
 
 
-'''
+''' OLD CODE -still here in case I forgot something
 def connect():
     global ID;
     sig = handshake(ID)

@@ -24,11 +24,14 @@ loop_counter = 120 #Starts high to create output immediately
 actions_executed = 0
 while(True):
     if os.path.getmtime("actions.json") > lastModified:
+        lines = 0
         with open("actions.json", mode = 'r') as r:
             for line in r:
                 actions.append(json.loads(line))
+                lines += 1
         w = open("actions.json", mode = 'w')
         w.close()
+        print("Added %s action(s). Pending: %s."%(lines,len(actions)))
         lastModified = os.path.getmtime("actions.json")
     for g in actions:
         if int(g["unix_time"]) < time.time():
@@ -46,6 +49,12 @@ while(True):
                 if BOT.swear_switch:
                     BOT.sendText(swearSuggestion(g["message"]))
                     print("Cleaned message.")
+            if g["type"] == "status":
+                out = g["message"]
+                out += "Actions Executed: %s\n"%actions_executed
+                out += "Actions Pending: %s\n"%len(actions-1) #-1 to ignore this action
+                BOT.sendText(out)
+                print("Status Sent.")
             actions_executed+=1
             actions.remove(g)
     loop_counter+=1

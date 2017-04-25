@@ -13,7 +13,13 @@ NAME = "Sarah"
 with open("options.json") as r:
     opts = json.loads(r.readline())
 
-#types: text, flag, pass
+'''
+Action types:
+    text - text to send to a group
+    flag - switch a flag on or off
+    pass - non-command message
+    status - responding with status
+'''
 def writeAction(data):
     with open("actions.json", mode = 'a') as a:
         a.write(json.dumps(data) + "\n")
@@ -45,6 +51,14 @@ def switchFlag(flag,Deltat):
 def passMessage(message):
     data = {
         "type": "pass",
+        "message": message,
+        "unix_time": time.time()
+    }
+    writeAction(data)
+
+def sendStatus(message):
+    data = {
+        "type": "status",
         "message": message,
         "unix_time": time.time()
     }
@@ -128,6 +142,45 @@ def respondSwearFilter(message):
         secs = 60
     switchFlag("--swear",secs)
 
+def respondReminder(message):
+    if "--remindme" in message:
+        pattern = "--remindme"
+    else:
+        pattern = "-rm"
+    arg = getArguments(message,pattern,1)[0]
+    try:
+        wait = int(arg)
+    except ValueError:
+        wait = 60
+    TIMEMAX = 32000000 #1 year
+    if wait < TIMEMAX:
+        writeText("This is a reminder.", wait)
+    else:
+        writeText("This is a reminder.", wait - time.time())
+
+def respondStatus(message, ID, reconnect, lastConnected):
+    if "--status" in message:
+        pattern = "--status"
+    else:
+        pattern = "-s"
+    arg = getArguments(message,pattern,1)[0]
+    try:
+        verbosity = int(arg)
+    except ValueError:
+        verbosity = 0
+    if verbosity == 0:
+        out = ""
+    elif verbosity == 1:
+        out = """Current ID: %s 
+                 Last Connected: %s 
+                 Reconnect in: %s
+              """%(ID, lastConnected, reconnect)
+        
+    
+    
+    
+    sendStatus(out)
+
 def parseText(message):
     if NAME in message:
         if "--help" in message or "-h" in message:
@@ -140,5 +193,7 @@ def parseText(message):
             respondAlive()
         if "--swear" in message or "-sw" in message:
             respondSwearFilter(message)
+        if "--remindme" in message or "-rm" in message:
+            respondReminder(message)
     else:
         passMessage(message)
