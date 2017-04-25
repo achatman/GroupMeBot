@@ -23,6 +23,7 @@ Action types:
 def writeAction(data):
     with open("actions.json", mode = 'a') as a:
         a.write(json.dumps(data) + "\n")
+    print("Wrote action with flag: " + data["type"])
 
 def writeText(message,Deltat=0):
     data = {
@@ -71,29 +72,44 @@ def getArguments(text,pattern,numArgs):
         args.append( arr[min(arr.index(pattern)+1+i,len(arr)-1)] )
     return args;
 
-def respondHelp():
+def respondHelp(message):
+    if "--help" in message:
+        pattern = "--help"
+    else:
+        pattern = "-h"
+    arg = getArguments(message,pattern,1)[0]
     bulletChar = "*"
     out = 'Here is a list of commands I respond to:\n'
-    for g in range(0,len(opts)):
+    opt = ''
+    for g in opts:
+        if arg == opts[g]["long"] or arg == opts[g]["short"]:
+            opt = g
+            break
+    if opt != '' and opt != 'Help':
+        out = "Help page for: " + opt + '\n'
         flags = bulletChar.ljust(3) + opts[g]["short"] + ','
         flags = flags.ljust(7)
         flags += opts[g]["long"]
-        for h in range(0,len(opts[g]["options"])):
-            flags += " [%s=%s]"%(opts[g]["options"][h]["name"], opts[g]["options"][h]["default"])
+        for g in range(len(opts[opt]["options"])):
+            flags += " [%s=%s]"%(opts[opt]["options"][g]["name"],
+                                 opts[opt]["options"][g]["default"])
         out += flags + '\n'
-        out += (bulletChar*2).ljust(6) + opts[g]["desc"]
-        for h in range(0,len(opts[g]["options"])):
+        out += (bulletChar*2).ljust(6) + opts[opt]["desc"]
+        for h in range(0,len(opts[opt]["options"])):
             out += '\n'
-            out += (bulletChar*3).ljust(9) + opts[g]["options"][h]["name"] + ' - ' + opts[g]["options"][h]["desc"]
-        out += '\n'
-        #Length is limited at 1000, so if len(out) > 700 (to be safe), 
-        #send the current text and start a new message.
-        if len(out) > 700:
-            writeText(out)
-            out = ''
-    if len(out) != 0:
-        writeText(out)
-        
+            out += (bulletChar*3).ljust(9) + opts[opt]["options"][h]["name"] + ' - ' + opts[opt]["options"][h]["desc"]
+    else:
+        out = "Here is a list of commands I respond to:" + '\n'
+        for g in opts:
+            flags = bulletChar.ljust(3) + opts[g]["short"] + ','
+            flags = flags.ljust(7)
+            flags += opts[g]["long"]
+            for h in range(0,len(opts[g]["options"])):
+                flags += " [%s=%s]"%(opts[g]["options"][h]["name"], opts[g]["options"][h]["default"])
+            out += flags + '\n'
+    
+    writeText(out)
+
 def respondQuote(message):
     if "--quote" in message:
         pattern = "--quote"
@@ -142,6 +158,9 @@ def respondSwearFilter(message):
         secs = 60
     switchFlag("--swear",secs)
 
+'''
+
+'''
 def respondReminder(message):
     if "--remindme" in message:
         pattern = "--remindme"
@@ -171,29 +190,25 @@ def respondStatus(message, ID, reconnect, lastConnected):
     if verbosity == 0:
         out = ""
     elif verbosity == 1:
-        out = """Current ID: %s 
-                 Last Connected: %s 
+        out = """Current ID: %s
+                 Last Connected: %s
                  Reconnect in: %s
               """%(ID, lastConnected, reconnect)
-        
-    
-    
-    
     sendStatus(out)
 
 def parseText(message):
     if NAME in message:
-        if "--help" in message or "-h" in message:
-            respondHelp();
-        if "--quote" in message or "-q" in message:
+        if "--help" in message.split() or "-h" in message.split():
+            respondHelp(message);
+        if "--quote" in message.split() or "-q" in message.split():
             respondQuote(message)
-        if "--shutup" in message or "-su" in message:
+        if "--shutup" in message.split() or "-su" in message.split():
             respondShutUp(message)
-        if "--alive" in message or "-a" in message:
+        if "--alive" in message.split() or "-a" in message.split():
             respondAlive()
-        if "--swear" in message or "-sw" in message:
+        if "--swear" in message.split() or "-sw" in message.split():
             respondSwearFilter(message)
-        if "--remindme" in message or "-rm" in message:
+        if "--remindme" in message.split() or "-rm" in message.split():
             respondReminder(message)
     else:
         passMessage(message)

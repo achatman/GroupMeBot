@@ -52,7 +52,7 @@ while(True):
             if g["type"] == "status":
                 out = g["message"]
                 out += "Actions Executed: %s\n"%actions_executed
-                out += "Actions Pending: %s\n"%len(actions-1) #-1 to ignore this action
+                out += "Actions Pending: %s\n"%(len(actions)-1) #-1 to ignore this action
                 BOT.sendText(out)
                 print("Status Sent.")
             actions_executed+=1

@@ -14,6 +14,7 @@ from commandsParsing import respondStatus
 import time
 import json
 import requests
+import re
 
 
 GROUP_ID = "29961146" #"20505137"
@@ -49,7 +50,7 @@ def process(response):
     
     if senderType != "bot":
         #respondStatus is called directly to allow more parameters to be passed
-        if "--status" in messageText or "-s" in messageText:
+        if "--status" in messageText.split() or "-s" in messageText.split():
             respondStatus(messageText, ID, reconnect - int(time.time() - connectTime), connectTime)
         parseText(messageText)
 
@@ -70,7 +71,6 @@ while True:
         reconnect = int(timeout) / 1000
         if len(ret[1]["data"]) > 1:
             process(ret[1])
-            print("Event Processed.")
         else:
             print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
     except requests.exceptions.ConnectionError:
