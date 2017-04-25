@@ -52,4 +52,4 @@ while(True):
     if loop_counter > 60:
         print(time.ctime(),"Actions Executed: " + str(actions_executed),"Actions Pending: " + str(len(actions)), sep='; ')
         loop_counter = 0
-    time.sleep(10)
+    time.sleep(2)

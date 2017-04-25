@@ -19,7 +19,6 @@ def writeAction(data):
         a.write(json.dumps(data) + "\n")
 
 def writeText(message,Deltat=0):
-    print(message)
     data = {
         "type": "text",
         "message": message,
@@ -28,7 +27,6 @@ def writeText(message,Deltat=0):
     writeAction(data)
 
 def switchFlag(flag,Deltat):
-    print(flag)
     data = {
         "type": "flag",
         "switch": flag,
@@ -74,7 +72,13 @@ def respondHelp():
             out += '\n'
             out += (bulletChar*3).ljust(9) + opts[g]["options"][h]["name"] + ' - ' + opts[g]["options"][h]["desc"]
         out += '\n'
-    return out;
+        #Length is limited at 1000, so if len(out) > 700 (to be safe), 
+        #send the current text and start a new message.
+        if len(out) > 700:
+            writeText(out)
+            out = ''
+    if len(out) != 0:
+        writeText(out)
         
 def respondQuote(message):
     if "--quote" in message:

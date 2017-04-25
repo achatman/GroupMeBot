@@ -29,7 +29,8 @@ class Bot(object):
         if not r.status_code == 202:
             print("Text send failed.")
             print(r.status_code, r.reason)
-            print("Message text: " + string)
+            print("Problematic text:", string)
+            print("Respone text:", r.text)
     
     def sendImage(self,imageURL):
         self.__strTypeCheck(imageURL,"imageURL")
