@@ -36,17 +36,17 @@ def connect():
     return sig;
     
 def process(response):
-    #alert = response["data"]["alert"]
     messageType = response["data"]["type"]
+    if messageType != "line.create":
+        print("Type: " + messageType)
+        return;
+    
+    #alert = response["data"]["alert"]
     #groupid = response["data"]["subject"]["group_id"]
     #senderid= response["data"]["subject"]["sender_id"]
     messageText = response["data"]["subject"]["text"]
     senderType = response["data"]["subject"]["sender_type"]
     #senderName = response["data"]["subject"]["name"]
-    
-    if messageType != "line.create":
-        print("Type: " + messageType)
-        return;
     
     if senderType != "bot":
         #respondStatus is called directly to allow more parameters to be passed

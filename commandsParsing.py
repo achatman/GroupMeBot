@@ -8,10 +8,28 @@ Created on Thu Mar 30 11:39:59 2017
 import json
 import random
 import time
+import re
+import datetime
+import pytz
 
 NAME = "Sarah"
 with open("options.json") as r:
     opts = json.loads(r.readline())
+
+months = {
+    1 : ["Jan", 31],
+    2 : ["Feb", 28],
+    3 : ["Mar", 31],
+    4 : ["Apr", 30],
+    5 : ["May", 31],
+    6 : ["Jun", 30],
+    7 : ["Jul", 31],
+    8 : ["Aug", 31],
+    9 : ["Sep", 30],
+    10: ["Oct", 31],
+    11: ["Nov", 30],
+    12: ["Dec", 31]
+}
 
 '''
 Action types:
@@ -107,7 +125,7 @@ def respondHelp(message):
             for h in range(0,len(opts[g]["options"])):
                 flags += " [%s=%s]"%(opts[g]["options"][h]["name"], opts[g]["options"][h]["default"])
             out += flags + '\n'
-    
+
     writeText(out)
 
 def respondQuote(message):
@@ -159,7 +177,41 @@ def respondSwearFilter(message):
     switchFlag("--swear",secs)
 
 '''
+Accepted formats:
+Example:
+2017-03-14T15:30:45
 
+Deltat - 120 [seconds]
+UNIX time - 1489505445
+
+yyyy-mm-ddThh:mm:ss
+* ^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d$
+* 2017-03-14T15:30:45
+* Exact time
+yyyy-mm-ddThh:mm
+* ^\d\d\d\d-\d\d-\d\dT\d\d:\d\d$
+* 2017-03-14T15:30
+* Exact time
+yyyy-mm-dd
+* ^\d\d\d\d-\d\d-\d\d$
+* 2017-03-14
+* Noon on given day
+yyyy
+* ^\d\d\d\d$
+* 2017
+* Noon on January 1
+mm-dd
+* ^\d\d-\d\d$
+* 03-14
+* Noon on next occurance of given date
+hh:mm
+* ^\d\d:\d\d$
+* 15:30
+* Next occurance of given time
+hh:mm:ss
+* ^\d\d:\d\d:\d\d$
+* 15:30:45
+* Next occurance of given time
 '''
 def respondReminder(message):
     if "--remindme" in message:
@@ -167,15 +219,68 @@ def respondReminder(message):
     else:
         pattern = "-rm"
     arg = getArguments(message,pattern,1)[0]
-    try:
-        wait = int(arg)
-    except ValueError:
-        wait = 60
-    TIMEMAX = 32000000 #1 year
-    if wait < TIMEMAX:
-        writeText("This is a reminder.", wait)
+    if re.search(r"^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d$",arg):
+        match = re.search(r"^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d$",arg).string
+        date = [int(match[0:4]),   int(match[5:7]),   int(match[8:10]),
+                int(match[11:13]), int(match[14:16]), int(match[17:19])]
+    elif re.search(r"^\d\d\d\d-\d\d-\d\dT\d\d:\d\d$",arg):
+        match = re.search(r"^\d\d\d\d-\d\d-\d\dT\d\d:\d\d$",arg).string
+        date = [int(match[0:4]),   int(match[5:7]),   int(match[8:10]),
+                int(match[11:13]), int(match[14:16]), 0]
+    elif re.search(r"^\d\d\d\d-\d\d-\d\d$",arg):
+        match = re.search(r"^\d\d\d\d-\d\d-\d\d$",arg).string
+        date = [int(match[0:4]), int(match[5:7]), int(match[8:10]),
+                12, 0, 0]
+    elif re.search(r"^\d\d\d\d$",arg):
+        match = re.search(r"^\d\d\d\d$",arg).string
+        date = [int(match), 1, 1, 12, 0, 0]
+    elif re.search(r"^\d\d-\d\d$",arg):
+        match = re.search(r"^\d\d-\d\d$",arg).string
+        date = [-1, int(match[0:2]), int(match[3:5]), 12, 0, 0]
+    elif re.search(r"^\d\d:\d\d$",arg):
+        match = re.search(r"^\d\d:\d\d$",arg).string
+        date = [-1, -1, -1, int(match[0:2]), int(match[3:5]), 0]
+    elif re.search(r"^\d\d:\d\d:\d\d$",arg):
+        match = re.search(r"^\d\d:\d\d:\d\d$",arg).string
+        date = [-1, -1, -1, int(match[0:2]), int(match[3:5]), int(match[6:8])]
     else:
-        writeText("This is a reminder.", wait - time.time())
+        return;
+
+    #yyyy, MM, dd, hh, mm, ss
+    #   0,  1,  2,  3,  4,  5
+
+    #Set implicit parameters
+    localtime = time.localtime(time.time())
+    if date[0] == -1:
+        date[0] = localtime[0]
+    if date[1] == -1:
+        date[1] = localtime[1]
+    if date[2] == -1:
+        date[2] = localtime[2]
+
+    #Check ranges
+    if date[5] < 0 or date[5] > 60:
+        return
+    if date[4] < 0 or date[4] > 60:
+        return
+    if date[3] < 0 or date[3] > 24:
+        return
+
+    if date[0] < localtime[0]:
+        return;
+    if date[1] < 0 or date[1] > 12:
+        return;
+    if date[2] < 0 or date[2] > months[date[1]][1]:
+        return;
+
+    #Check if time is passed
+    remindTime = datetime.datetime(date[0],date[1],date[2],date[3],date[4],date[5])
+    if remindTime.timestamp() < time.time():
+        return;
+
+    writeText("Reminder set for %s, %s seconds from now."%(arg, remindTime.timestamp() - time.time()))
+    writeText("This is a reminder for %s"%arg, remindTime.timestamp() - time.time())
+
 
 def respondStatus(message, ID, reconnect, lastConnected):
     if "--status" in message:
