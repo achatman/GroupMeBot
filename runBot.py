@@ -7,6 +7,11 @@ import time
 
 BOT = Bot("703271301450305b8b94947068")
 
+def convertSecs(secs):
+    m, s = divmod(secs, 60)
+    h, m = divmod(m, 60)
+    return "%d:%02d:%02d" % (h, m, s)
+
 def swearSuggestion(message):
     with open("rude.json") as r:
         rude = json.loads(r.readline())
@@ -50,9 +55,18 @@ while(True):
                     BOT.sendText(swearSuggestion(g["message"]))
                     print("Cleaned message.")
             if g["type"] == "status":
-                out = g["message"]
-                out += "Actions Executed: %s\n"%actions_executed
-                out += "Actions Pending: %s\n"%(len(actions)-1) #-1 to ignore this action
+                out = "Actions Executed: %s\n" % actions_executed
+                out += "Actions Pending: %s\n" % (len(actions)-1) #-1 to ignore this action
+                if g["data"]["verbosity"] > 0:
+                    out += "Running since: %s\n" % time.asctime(time.localtime(g["data"]["started"]))
+                    out += "Total Runtime: %s\n" % convertSecs(time.time() - g["data"]["started"])
+                    out += "Up Time: %s\n" % convertSecs(g["data"]["started"])
+                    out += "Down Time: %s\n" % convertSecs(g["data"]["downTime"])
+                if g["data"]["verbosity"] > 1:
+                    out += "Current ID: %s\n" % g["data"]["id"]
+                    out += "Reconnect in: %s\n" % g["data"]["reconnect_in"]
+                    out += "Reconnect at: %s\n" % time.asctime(time.localtime(g["data"]["reconnect_at"]))
+                    out += "Last Connected at: %s\n" % time.asctime(time.localtime(g["data"]["lastConnected"]))
                 BOT.sendText(out)
                 print("Status Sent.")
             actions_executed+=1

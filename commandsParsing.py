@@ -75,10 +75,10 @@ def passMessage(message):
     }
     writeAction(data)
 
-def sendStatus(message):
+def sendStatus(metadata):
     data = {
         "type": "status",
-        "message": message,
+        "data": metadata,
         "unix_time": time.time()
     }
     writeAction(data)
@@ -306,7 +306,7 @@ def respondReminder(message):
     writeText("This is a reminder for %s"%arg, remindTime.timestamp() - time.time())
 
 
-def respondStatus(message, ID, reconnect, lastConnected):
+def respondStatus(message, metadata):
     if "--status" in message:
         pattern = "--status"
     else:
@@ -316,16 +316,11 @@ def respondStatus(message, ID, reconnect, lastConnected):
         verbosity = int(arg)
     except ValueError:
         verbosity = 0
-    if verbosity == 0:
-        out = ""
-    elif verbosity == 1:
-        out = """Current ID: %s
-                 Last Connected: %s
-                 Reconnect in: %s
-              """%(ID, lastConnected, reconnect)
-    sendStatus(out)
+    verbosity = max(0,verbosity)
+    metadata.update({"verbosity":verbosity})
+    sendStatus(metadata)
 
-def parseText(message):
+def parseText(message, metadata):
     if NAME in message:
         if "--help" in message.split() or "-h" in message.split():
             respondHelp(message);
@@ -339,5 +334,7 @@ def parseText(message):
             respondSwearFilter(message)
         if "--remindme" in message.split() or "-rm" in message.split():
             respondReminder(message)
+        if "--status" in message.split() or "-s" in message.split():
+            respondStatus(message, metadata)
     else:
         passMessage(message)

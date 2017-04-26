@@ -9,12 +9,10 @@ from longpoll import handshake
 from longpoll import userchannel
 from longpoll import poll
 from commandsParsing import parseText
-from commandsParsing import respondStatus
 
 import time
 import json
 import requests
-import re
 
 
 GROUP_ID = "29961146" #"20505137"
@@ -49,13 +47,21 @@ def process(response):
     #senderName = response["data"]["subject"]["name"]
     
     if senderType != "bot":
-        #respondStatus is called directly to allow more parameters to be passed
-        if "--status" in messageText.split() or "-s" in messageText.split():
-            respondStatus(messageText, ID, reconnect - int(time.time() - connectTime), connectTime)
-        parseText(messageText)
+        status = {
+            "id" : ID,
+            "reconnect_in": reconnect - int(time.time() - connectTime),
+        	 "reconnect_at": reconnect,
+            "lastConnected": connectTime,
+            "started": startingTime,
+            "downTime": errorCount * waitTime,
+            "upTime": time.time() - startingTime - (errorCount * waitTime)
+        }
+        parseText(messageText, status)
 
 sig = connect()
+startingTime = int(time.time())
 connectTime = int(time.time())
+errorCount= 0
 reconnect = 300
 waitTime = 30
 while True:
@@ -75,6 +81,7 @@ while True:
             print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
     except requests.exceptions.ConnectionError:
         print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
+        errorCount += 1
         for i in range(0,3):
             print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
             time.sleep(waitTime/3)
