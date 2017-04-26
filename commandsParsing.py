@@ -133,21 +133,45 @@ def respondQuote(message):
         pattern = "--quote"
     else:
         pattern = "-q"
-    prof = getArguments(message,pattern,1)[0]
+    args = getArguments(message,pattern,2)
+    prof = args[0]
+    try:
+        num = int(args[1])
+    except ValueError:
+        num = 1
+    num = min(num, 100)
     with open("profQuotes.json",encoding = 'utf-8',mode = 'r') as r:
         file = json.loads(r.readline())
     quotesJSON = file["Quotes"]
     quotesOptions = []
-    attribute = ''
+    out = ''
     for i in range(0,len(quotesJSON)):
         if prof.lower() in quotesJSON[i]["Prof"].lower():
-            attribute = quotesJSON[i]["Prof"]
-            quotesOptions.append(quotesJSON[i]["Text"])
+            quotesOptions.append(quotesJSON[i])
+    added = []
     if len(quotesOptions) > 0:
-        writeText(quotesOptions[random.randrange(0,len(quotesOptions))] + " --" + attribute)
+        for i in range(num):
+            if len(out) > 900:
+                writeText(out)
+                out = ''
+            index = random.randrange(0,len(quotesOptions))
+            text = quotesOptions[index]["Text"]
+            att = quotesOptions[index]["Prof"]
+            if text not in added:
+                out += text + ' --' + att + '\n'
+                added.append(text)
     else:
-        index = random.randrange(0,len(quotesJSON))
-        writeText(quotesJSON[index]["Text"] + " --" + quotesJSON[index]["Prof"])
+        for i in range(num):
+            if len(out) > 900:
+                writeText(out)
+                out = ''
+            index = random.randrange(0,len(quotesJSON))
+            text = quotesJSON[index]["Text"]
+            att =  quotesJSON[index]["Prof"]
+            if text not in added:
+                out +=  text + " --" + att + '\n'
+                added.append(text)
+    writeText(out)
 
 def respondShutUp(message):
     if "--shutup" in message:
