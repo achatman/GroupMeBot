@@ -58,15 +58,15 @@ while(True):
                 out = "Actions Executed: %s\n" % actions_executed
                 out += "Actions Pending: %s\n" % (len(actions)-1) #-1 to ignore this action
                 if g["data"]["verbosity"] > 0:
-                    out += "Running since: %s\n" % time.asctime(time.localtime(g["data"]["started"]))
+                    out += "Running since: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["started"]))
                     out += "Total Runtime: %s\n" % convertSecs(time.time() - g["data"]["started"])
                     out += "Up Time: %s\n" % convertSecs(g["data"]["started"])
                     out += "Down Time: %s\n" % convertSecs(g["data"]["downTime"])
                 if g["data"]["verbosity"] > 1:
                     out += "Current ID: %s\n" % g["data"]["id"]
                     out += "Reconnect in: %s\n" % g["data"]["reconnect_in"]
-                    out += "Reconnect at: %s\n" % time.asctime(time.localtime(g["data"]["reconnect_at"]))
-                    out += "Last Connected at: %s\n" % time.asctime(time.localtime(g["data"]["lastConnected"]))
+                    out += "Reconnect at: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["reconnect_at"]))
+                    out += "Last Connected at: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["lastConnected"]))
                 BOT.sendText(out)
                 print("Status Sent.")
             actions_executed+=1

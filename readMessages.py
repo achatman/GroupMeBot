@@ -50,11 +50,11 @@ def process(response):
         status = {
             "id" : ID,
             "reconnect_in": reconnect - int(time.time() - connectTime),
-        	 "reconnect_at": reconnect,
+        	 "reconnect_at": reconnect + time.time(),
             "lastConnected": connectTime,
             "started": startingTime,
             "downTime": errorCount * waitTime,
-            "upTime": time.time() - startingTime - (errorCount * waitTime)
+            "upTime": time.time() - (startingTime + (errorCount * waitTime))
         }
         parseText(messageText, status)
 

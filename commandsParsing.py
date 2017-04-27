@@ -10,7 +10,6 @@ import random
 import time
 import re
 import datetime
-import pytz
 
 NAME = "Sarah"
 with open("options.json") as r:
