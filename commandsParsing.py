@@ -15,6 +15,9 @@ NAME = "Sarah"
 with open("options.json") as r:
     opts = json.loads(r.readline())
 
+with open("bible.json") as r:
+    bible = json.loads(r.readline())
+
 months = {
     1 : ["Jan", 31],
     2 : ["Feb", 28],
@@ -319,7 +322,26 @@ def respondStatus(message, metadata):
     metadata.update({"verbosity":verbosity})
     sendStatus(metadata)
 
-def parseText(message, metadata):
+def respondEvang(message):
+    versesarr = []
+    for g in bible:
+        for h in range(len(bible[g]["Chapters"])):
+            for i in range(len(bible[g]["Chapters"][h])):
+                if "Jesus" in bible[g]["Chapters"][h][i]:
+                    versesarr.append(bible[g]["Chapters"][h][i])
+    verse = versesarr[random.randrange(0,len(versesarr))]
+    i = verse.find("Jesus")
+    original = verse
+    verse = verse[:i] + "Mouse Jesus" + verse[i+5:]
+    verse += '\n'
+    for g in bible:
+        for h in range(len(bible[g]["Chapters"])):
+            for i in range(len(bible[g]["Chapters"][h])):
+                if original == bible[g]["Chapters"][h][i]:
+                    verse += "%s %d:%d" % (bible[g]["book_name"], h, i)
+    writeText(verse)
+
+def parseText(message, metadata, sender):
     if NAME in message:
         if "--help" in message.split() or "-h" in message.split():
             respondHelp(message);
@@ -335,5 +357,26 @@ def parseText(message, metadata):
             respondReminder(message)
         if "--status" in message.split() or "-s" in message.split():
             respondStatus(message, metadata)
+        if "--evangelize" in message.split() or "-evang" in message.split():
+            respondEvang(message)
+        if sender == "29861221":
+            writeText("""Miles = 1.60934 kilometers
+                               = 1609.34 meters
+                               = 160934 centimeters
+                               = 1.609E6 millimeters
+                               = 1760 yards
+                               = 5280 feet
+                               = 63360 inches
+                               = 0.868976 nautical miles
+                               = 880 fathoms
+                               = 0.333 leagues
+                               = 80 chains
+                               = 320 rods
+                               = 2.526E-4 Earth Radii
+                               = 1.076E-8 AU
+                               = 1.701E-13 light years
+                               = 5.216E-14 parsecs
+                               = 1.146E-26 Hubble lengths
+                        """)
     else:
         passMessage(message)

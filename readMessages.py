@@ -9,6 +9,7 @@ from longpoll import handshake
 from longpoll import userchannel
 from longpoll import poll
 from commandsParsing import parseText
+from commandsParsing import writeText
 
 import time
 import json
@@ -41,7 +42,7 @@ def process(response):
     
     #alert = response["data"]["alert"]
     #groupid = response["data"]["subject"]["group_id"]
-    #senderid= response["data"]["subject"]["sender_id"]
+    senderid= response["data"]["subject"]["sender_id"]
     messageText = response["data"]["subject"]["text"]
     senderType = response["data"]["subject"]["sender_type"]
     #senderName = response["data"]["subject"]["name"]
@@ -56,7 +57,7 @@ def process(response):
             "downTime": errorCount * waitTime,
             "upTime": time.time() - (startingTime + (errorCount * waitTime))
         }
-        parseText(messageText, status)
+        parseText(messageText, status, senderid)
 
 sig = connect()
 startingTime = int(time.time())
