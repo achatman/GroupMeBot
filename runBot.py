@@ -60,7 +60,7 @@ while(True):
                 if g["data"]["verbosity"] > 0:
                     out += "Running since: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["started"]))
                     out += "Total Runtime: %s\n" % convertSecs(time.time() - g["data"]["started"])
-                    out += "Up Time: %s\n" % convertSecs(g["data"]["started"])
+                    out += "Up Time: %s\n" % convertSecs(g["data"]["upTime"])
                     out += "Down Time: %s\n" % convertSecs(g["data"]["downTime"])
                 if g["data"]["verbosity"] > 1:
                     out += "Current ID: %s\n" % g["data"]["id"]
