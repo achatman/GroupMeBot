@@ -49,8 +49,8 @@ def process(response):
     if senderType != "bot":
         status = {
             "id" : ID,
-            "reconnect_in": reconnect - int(time.time() - connectTime),
-        	 "reconnect_at": reconnect + time.time(),
+            "reconnect_in": reconnect - int(connectTime),
+        	 "reconnect_at": reconnect,
             "lastConnected": connectTime,
             "started": startingTime,
             "downTime": errorCount * waitTime,
@@ -66,22 +66,24 @@ reconnect = 300
 waitTime = 30
 while True:
     try:
-        if int(time.time()) > connectTime + reconnect:
+        if int(time.time()) > reconnect:
             sig = connect()
             connectTime = int(time.time())
-            reconnect = 300
-        print("Polling...")
+            reconnect = connectTime + 300
+        print("Polling %d..." % ID)
         ret = poll(ID,sig)
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
-        reconnect = int(timeout) / 1000
+        reconnect = connectTime + int(timeout) / 1000
         if len(ret[1]["data"]) > 1:
             process(ret[1])
         else:
-            print("No event. Reconnect in: %s"%(reconnect - int(time.time() - connectTime)))
+            print("No event. Reconnect in: %s"%(reconnect - connectTime), flush = True)
     except requests.exceptions.ConnectionError:
         print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
         errorCount += 1
+        ID += 1
+        reconnect = -1
         for i in range(0,3):
             print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
             time.sleep(waitTime/3)

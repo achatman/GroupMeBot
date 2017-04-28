@@ -23,7 +23,7 @@ def swearSuggestion(message):
             clean = clean[:index] + rude[g.lower()] + clean[index + len(g):]
     return clean
 
-lastModified = os.path.getmtime("actions.json")
+lastModified = os.path.getmtime("actions.json") - 1
 actions = []
 loop_counter = 120 #Starts high to create output immediately
 actions_executed = 0
