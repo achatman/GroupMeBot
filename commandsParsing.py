@@ -100,7 +100,6 @@ def respondHelp(message):
         pattern = "-h"
     arg = getArguments(message,pattern,1)[0]
     bulletChar = "*"
-    out = 'Here is a list of commands I respond to:\n'
     opt = ''
     for g in opts:
         if arg == opts[g]["long"] or arg == opts[g]["short"]:
@@ -176,17 +175,17 @@ def respondQuote(message):
                 added.append(text)
     writeText(out)
 
-def respondShutUp(message):
-    if "--shutup" in message:
-        pattern = "--shutup"
+def respondQuiet(message):
+    if "--quiet" in message:
+        pattern = "--quiet"
     else:
-        pattern = "-su"
+        pattern = "-qu"
     arg = getArguments(message,pattern,1)[0]
     try:
         secs = int(arg)
     except ValueError:
         secs = 60
-    switchFlag("--shutup",secs)
+    switchFlag("--quiet",secs)
 
 def respondAlive():
     writeText("Still alive.")
@@ -362,8 +361,8 @@ def parseText(message, metadata, sender):
             respondHelp(message);
         if "--quote" in message.split() or "-q" in message.split():
             respondQuote(message)
-        if "--shutup" in message.split() or "-su" in message.split():
-            respondShutUp(message)
+        if "--quiet" in message.split() or "-qu" in message.split():
+            respondQuiet(message)
         if "--alive" in message.split() or "-a" in message.split():
             respondAlive()
         if "--swear" in message.split() or "-sw" in message.split():

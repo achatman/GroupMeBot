@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import json
 
 with open("token.txt") as r:
     tok = r.readline()
@@ -16,7 +15,7 @@ class Bot(object):
         self.__strTypeCheck(ID,"ID")
         self.id = ID
         self.url = "https://api.groupme.com/v3/bots/post"
-        self.shutup_switch = False
+        self.quiet_switch = False
         self.swear_switch = False
         
     def sendText(self,string):

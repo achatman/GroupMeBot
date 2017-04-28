@@ -41,12 +41,12 @@ while(True):
     for g in actions:
         if int(g["unix_time"]) < time.time():
             if g["type"] == "text":
-                if not BOT.shutup_switch:
+                if not BOT.quiet_switch:
                     BOT.sendText(g["message"])
                     print("Message sent.")
             if g["type"] == "flag":
-                if g["switch"] == "--shutup":
-                    BOT.shutup_switch = bool(g["direction"])
+                if g["switch"] == "--quiet":
+                    BOT.quiet_switch = bool(g["direction"])
                 if g["switch"] == "--swear":
                     BOT.swear_switch = bool(g["direction"])
                 print(g['switch'],g["direction"])
