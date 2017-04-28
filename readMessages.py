@@ -9,7 +9,6 @@ from longpoll import handshake
 from longpoll import userchannel
 from longpoll import poll
 from commandsParsing import parseText
-from commandsParsing import writeText
 
 import time
 import json

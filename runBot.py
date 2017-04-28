@@ -62,6 +62,7 @@ while(True):
                     out += "Total Runtime: %s\n" % convertSecs(time.time() - g["data"]["started"])
                     out += "Up Time: %s\n" % convertSecs(g["data"]["upTime"])
                     out += "Down Time: %s\n" % convertSecs(g["data"]["downTime"])
+                    out += "Up Time Fraction: %s\n" % (g["data"]["upTime"] / (g["data"]["upTime"] + g["data"]["downTime"]))
                 if g["data"]["verbosity"] > 1:
                     out += "Current ID: %s\n" % g["data"]["id"]
                     out += "Reconnect in: %s\n" % g["data"]["reconnect_in"]

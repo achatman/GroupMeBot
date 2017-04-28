@@ -10,6 +10,7 @@ import random
 import time
 import re
 import datetime
+import requests
 
 NAME = "Sarah"
 with open("options.json") as r:
@@ -340,6 +341,20 @@ def respondEvang(message):
                 if original == bible[g]["Chapters"][h][i]:
                     verse += "%s %d:%d" % (bible[g]["book_name"], h, i)
     writeText(verse)
+    
+def respondWeather():
+    with open("weather.txt", mode = 'r') as r:
+        key = r.readline()
+    url = "http://api.wunderground.com/api/" + key + "/conditions/q/IA/Ames.json"
+    r = requests.get(url)
+    response = json.loads(r.text)["current_observation"]
+    out = "--Current Weather in Ames, IA--\n"
+    out += "Weather: %s\n" % response["weather"]
+    out += "Temperature: %s\n" % response["temperature_string"]
+    out += "Humidity: %s\n" % response["relative_humidity"]
+    out += "Wind: %d mph (%d kph) %s\n" % (response["wind_mph"],response["wind_kph"],response["wind_dir"])
+    out += "Windchill: %s\n" % response["windchill_string"]
+    writeText(out)
 
 def parseText(message, metadata, sender):
     if NAME in message:
@@ -359,6 +374,8 @@ def parseText(message, metadata, sender):
             respondStatus(message, metadata)
         if "--evangelize" in message.split() or "-evang" in message.split():
             respondEvang(message)
+        if "--weather" in message.split() or "-w" in message.split():
+            respondWeather()
         if sender == "29861221":
             writeText("""Miles = 1.60934 kilometers
                                = 1609.34 meters
