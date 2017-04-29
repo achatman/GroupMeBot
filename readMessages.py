@@ -5,18 +5,19 @@ Created on Wed Mar 29 16:20:44 2017
 @author: Andrew
 """
 
+from config import setupConfig
+
+setupConfig()
+
 from longpoll import handshake
 from longpoll import userchannel
 from longpoll import poll
 from commandsParsing import parseText
 
+
 import time
 import json
 import requests
-
-
-GROUP_ID = "29961146" #"20505137"
-AVATAR_URL = "https://i.groupme.com/1920x1080.jpeg.6141b043a4844c3584ad2ef2db520a99"
 
 with open("rude.json", mode = 'r') as r:
     rude = json.loads(r.readline())
@@ -72,6 +73,7 @@ while True:
             reconnect = connectTime + 300
         print("Polling %d..." % ID)
         ret = poll(ID,sig)
+        print(json.dumps(ret, indent = 2))
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
         reconnect = connectTime + int(timeout) / 1000
@@ -83,10 +85,9 @@ while True:
         print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
         errorCount += 1
         ID += 1
-        reconnect = -1
         for i in range(0,3):
             print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
-            time.sleep(waitTime/3)
+            #time.sleep(waitTime/3)
         print('')
     
 

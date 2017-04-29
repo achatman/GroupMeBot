@@ -1,11 +1,16 @@
 
 
+from config import setupConfig
+setupConfig()
+
 from botObj import Bot
 import os
 import json
 import time
 
-BOT = Bot("703271301450305b8b94947068")
+with open("bot.config") as r:
+    config = json.loads(r.readline())
+    BOT = Bot(config["bot_ids"][0])
 
 def convertSecs(secs):
     m, s = divmod(secs, 60)

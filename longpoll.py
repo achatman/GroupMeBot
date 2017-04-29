@@ -5,10 +5,12 @@ import json
 import time
 
 fayeURL = "https://push.groupme.com/faye"
-userID = "15434777"
-botPlayID = "29961146"
-with open("token.txt") as r:
-    tok = r.readline()
+with open("bot.config") as r:
+    config = json.loads(r.readline())
+    tok = config["token"]
+    userID = config["user_id"]
+    
+tok = "vZwIgDi8R7DtFgzf4jPSUy6pxcFs0I6fLujahiv8"
 
 def handshake(ID):
     handshake = [

@@ -27,6 +27,7 @@ def setupConfig():
             
     #Default Values:
     token = ''
+    userid = ''
     group_ids = []
     bot_ids = []
     log_bot_id = ''
@@ -42,7 +43,7 @@ def setupConfig():
     while go:
         token = input("Enter your API token here:")
         print("You will be unable to access the GroupMe API with an invalid token.")
-        print("You entered %s." % token)
+        print("You entered %s" % token)
         while True:
             check = input("Are you sure this is your token? (y/n)")
             if check == 'y':
@@ -52,6 +53,24 @@ def setupConfig():
                 break;
             else:
                 print("Please enter y or n.")
+    
+    print()
+    
+    #Get user ID
+    print("You will need to enter your GroupMe user ID.")
+    go = True
+    while go:
+        userid = input("Enter your user ID here:")
+        while True:
+            check = input("Are you sure this is your user ID? (y/n)")
+            if check == 'y':
+                go = False
+                break;
+            elif check == 'n':
+                break;
+            else:
+                print("Please enter y or n.")
+    
     
     print()
     
@@ -201,6 +220,7 @@ def setupConfig():
 
     output = {}
     output.update({"token" : token})
+    output.update({"user_id" : userid})
     output.update({"group_ids" : group_ids})
     output.update({"bot_ids" : bot_ids})
     output.update({"log_group_id" : log_group_id})
@@ -216,6 +236,4 @@ def setupConfig():
     print("You have finished the config setup.")
     print("Your chosen options are stored in bot.config.")
     print("If you ever want to change an option, you can rerun this setup or you can edit the bot.config file manually.")
-    
-setupConfig()
-        
+       

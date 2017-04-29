@@ -322,7 +322,20 @@ def respondStatus(message, metadata):
     metadata.update({"verbosity":verbosity})
     sendStatus(metadata)
 
-def respondEvang(message):
+def respondEvang():
+    replacements = {
+        "Jesus" : "Mouse Jesus",        "saints" : "murine saints",     "godliness" : "mousiness",
+        "God" : "The Big Cheese",       "Jews" : "Rats",                "Jew" : "Rat",
+        "Romans": "Cats",               "Roman" : "Cat",                "Father": "Great Gouda",
+        "kiss": "sniff",                "Peace": "Cheese",              "Simon": "Salamander Simon",
+        "Peter": "Peter Pig",           "Andrew": "Aardwolf Andrew",    "Philip": "Pheasant Philip",
+        "Barnabas": "Barnabas Baboon",  "Lord": "Alpha",                "Rabbi": "Alpha Rat",
+        "Matthew": "Matthew Monkey",    "John" : "Jaguar John",         "Mark" : "Moose Mark",
+        "Luke" : "Leopard Luke",        "Lamb": "Crumb",                "lamb": "crumb",
+        "angel": "curd",                "Angel": "Curd",                "priest": "fromager",
+        "Priest": "Fromager"
+}    
+    
     versesarr = []
     for g in bible:
         for h in range(len(bible[g]["Chapters"])):
@@ -330,16 +343,29 @@ def respondEvang(message):
                 if "Jesus" in bible[g]["Chapters"][h][i]:
                     versesarr.append(bible[g]["Chapters"][h][i])
     verse = versesarr[random.randrange(0,len(versesarr))]
-    i = verse.find("Jesus")
-    original = verse
-    verse = verse[:i] + "Mouse Jesus" + verse[i+5:]
-    verse += '\n'
     for g in bible:
         for h in range(len(bible[g]["Chapters"])):
             for i in range(len(bible[g]["Chapters"][h])):
-                if original == bible[g]["Chapters"][h][i]:
-                    verse += "%s %d:%d" % (bible[g]["book_name"], h, i)
-    writeText(verse)
+                if verse == bible[g]["Chapters"][h][i]:
+                    address = "%s %d:%d" % (bible[g]["book_name"], h, i)
+    
+    #Make replacements
+    i = 0
+    while i < len(verse):
+        j = i
+        while j < len(verse):
+            if verse[i:j] in replacements:
+                length = len(replacements[verse[i:j]])
+                verse = verse[:i] + replacements[verse[i:j]] + verse[j:]
+                i += length
+                break
+            j += 1
+        i += 1
+    
+    
+    verse += '\n' + address
+    print(verse)
+    #writeText(verse)
     
 def respondWeather():
     with open("weather.txt", mode = 'r') as r:
@@ -354,6 +380,16 @@ def respondWeather():
     out += "Wind: %d mph (%d kph) %s\n" % (response["wind_mph"],response["wind_kph"],response["wind_dir"])
     out += "Windchill: %s\n" % response["windchill_string"]
     writeText(out)
+    
+def checkSender(senderid):
+    if senderid == "29861221":
+        arr = ["1.60934 kilometers",        "1609.34 meters",           "160934 centimeters",
+               "1.609E6 millimeters",       "1760 yards","5280 feet",   "63360 inches",
+               "0.868976 nautical miles",   "880 fathoms",              "0.333 leagues",
+               "80 chains",                 "320 rods",                 "2.526E-4 Earth Radii",
+               "1.076E-8 AU",               "1.701E-13 light years",    "5.216E-14 parsecs",
+               "1.146E-26 Hubble lengths"]
+        writeText("Miles = %s" % arr[random.randrange(0,len(arr))])
 
 def parseText(message, metadata, sender):
     if NAME in message:
@@ -372,27 +408,8 @@ def parseText(message, metadata, sender):
         if "--status" in message.split() or "-s" in message.split():
             respondStatus(message, metadata)
         if "--evangelize" in message.split() or "-evang" in message.split():
-            respondEvang(message)
+            respondEvang()
         if "--weather" in message.split() or "-w" in message.split():
             respondWeather()
-        if sender == "29861221":
-            writeText("""Miles = 1.60934 kilometers
-                               = 1609.34 meters
-                               = 160934 centimeters
-                               = 1.609E6 millimeters
-                               = 1760 yards
-                               = 5280 feet
-                               = 63360 inches
-                               = 0.868976 nautical miles
-                               = 880 fathoms
-                               = 0.333 leagues
-                               = 80 chains
-                               = 320 rods
-                               = 2.526E-4 Earth Radii
-                               = 1.076E-8 AU
-                               = 1.701E-13 light years
-                               = 5.216E-14 parsecs
-                               = 1.146E-26 Hubble lengths
-                        """)
     else:
         passMessage(message)

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import json
 
-with open("token.txt") as r:
-    tok = r.readline()
+with open("bot.config") as r:
+    config = json.loads(r.readline())
+    tok = config["token"]
+    
 url = "https://api.groupme.com/v3/bots?token=" + tok
 
 class Bot(object):
