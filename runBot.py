@@ -8,9 +8,14 @@ import os
 import json
 import time
 
+BOTS = []
+BOT_CONVERT = {}
+
 with open("bot.config") as r:
     config = json.loads(r.readline())
-    BOT = Bot(config["bot_ids"][0])
+    for i in range(len(config["bot_ids"])):
+        BOTS.append(Bot(config["bot_ids"][i]))
+        BOT_CONVERT.update({config["group_ids"][i] : i})
 
 def convertSecs(secs):
     m, s = divmod(secs, 60)
@@ -30,7 +35,7 @@ def swearSuggestion(message):
 
 lastModified = os.path.getmtime("actions.json") - 1
 actions = []
-loop_counter = 120 #Starts high to create output immediately
+loop_counter = 1200 #Starts high to create output immediately
 actions_executed = 0
 while(True):
     if os.path.getmtime("actions.json") > lastModified:
@@ -44,20 +49,21 @@ while(True):
         print("Added %s action(s). Pending: %s."%(lines,len(actions)))
         lastModified = os.path.getmtime("actions.json")
     for g in actions:
+        bot = BOTS[BOT_CONVERT[g["group_id"]]]
         if int(g["unix_time"]) < time.time():
             if g["type"] == "text":
-                if not BOT.quiet_switch:
-                    BOT.sendText(g["message"])
+                if not bot.quiet_switch:
+                    bot.sendText(g["message"])
                     print("Message sent.")
             if g["type"] == "flag":
                 if g["switch"] == "--quiet":
-                    BOT.quiet_switch = bool(g["direction"])
+                    bot.quiet_switch = bool(g["direction"])
                 if g["switch"] == "--swear":
-                    BOT.swear_switch = bool(g["direction"])
+                    bot.swear_switch = bool(g["direction"])
                 print(g['switch'],g["direction"])
             if g["type"] == "pass":
-                if BOT.swear_switch:
-                    BOT.sendText(swearSuggestion(g["message"]))
+                if bot.swear_switch:
+                    bot.sendText(swearSuggestion(g["message"]))
                     print("Cleaned message.")
             if g["type"] == "status":
                 out = "Actions Executed: %s\n" % actions_executed
@@ -77,7 +83,7 @@ while(True):
                     out += "Message Type Counts:\n"
                     for h in g["data"]["message_counts"]:
                         out += "**%s: %d\n" % (h,g["data"]["message_counts"][h])
-                BOT.sendText(out)
+                bot.sendText(out)
                 print("Status Sent.")
             actions_executed+=1
             actions.remove(g)

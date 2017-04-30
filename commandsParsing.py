@@ -51,43 +51,48 @@ def writeAction(data):
         a.write(json.dumps(data) + "\n")
     print("Wrote action with flag: " + data["type"])
 
-def writeText(message,Deltat=0):
+def writeText(message, group, Deltat=0):
     data = {
         "type": "text",
         "message": message,
-        "unix_time": time.time() + Deltat
+        "unix_time": time.time() + Deltat,
+        "group_id": group
     }
     writeAction(data)
 
-def switchFlag(flag,Deltat):
+def switchFlag(flag, group, Deltat):
     data = {
         "type": "flag",
         "switch": flag,
         "direction": True,
-        "unix_time": time.time()
+        "unix_time": time.time(),
+        "group_id": group
     }
     writeAction(data)
     data = {
         "type": "flag",
         "switch": flag,
         "direction": False,
-        "unix_time": time.time() + Deltat
+        "unix_time": time.time() + Deltat,
+        "group_id" : group
     }
     writeAction(data)
 
-def passMessage(message):
+def passMessage(message, group):
     data = {
         "type": "pass",
         "message": message,
-        "unix_time": time.time()
+        "unix_time": time.time(),
+        "group_id" : group
     }
     writeAction(data)
 
-def sendStatus(metadata):
+def sendStatus(metadata, group):
     data = {
         "type": "status",
         "data": metadata,
-        "unix_time": time.time()
+        "unix_time": time.time(),
+        "group_id" : group
     }
     writeAction(data)
 
@@ -98,7 +103,7 @@ def getArguments(text,pattern,numArgs):
         args.append( arr[min(arr.index(pattern)+1+i,len(arr)-1)] )
     return args;
 
-def respondHelp(message):
+def respondHelp(message, group):
     if "--help" in message:
         pattern = "--help"
     else:
@@ -133,9 +138,9 @@ def respondHelp(message):
                 flags += " [%s=%s]"%(opts[g]["options"][h]["name"], opts[g]["options"][h]["default"])
             out += flags + '\n'
 
-    writeText(out)
+    writeText(out, group)
 
-def respondQuote(message):
+def respondQuote(message, group):
     if "--quote" in message:
         pattern = "--quote"
     else:
@@ -170,7 +175,7 @@ def respondQuote(message):
     else:
         for i in range(num):
             if len(out) > 900:
-                writeText(out)
+                writeText(out, group)
                 out = ''
             index = random.randrange(0,len(quotesJSON))
             text = quotesJSON[index]["Text"]
@@ -178,9 +183,9 @@ def respondQuote(message):
             if text not in added:
                 out +=  text + " --" + att + '\n'
                 added.append(text)
-    writeText(out)
+    writeText(out, group)
 
-def respondQuiet(message):
+def respondQuiet(message, group):
     if "--quiet" in message:
         pattern = "--quiet"
     else:
@@ -190,12 +195,12 @@ def respondQuiet(message):
         secs = int(arg)
     except ValueError:
         secs = 60
-    switchFlag("--quiet",secs)
+    switchFlag("--quiet", group, secs)
 
-def respondAlive():
-    writeText("Still alive.")
+def respondAlive(group):
+    writeText("Still alive.", group)
 
-def respondSwearFilter(message):
+def respondSwearFilter(message, group):
     if "--swear" in message:
         pattern = "--swear"
     else:
@@ -205,7 +210,7 @@ def respondSwearFilter(message):
         secs = int(arg)
     except ValueError:
         secs = 60
-    switchFlag("--swear",secs)
+    switchFlag("--swear", group, secs)
 
 '''
 Accepted formats:
@@ -244,7 +249,7 @@ hh:mm:ss
 * 15:30:45
 * Next occurance of given time
 '''
-def respondReminder(message):
+def respondReminder(message, group):
     if "--remindme" in message:
         pattern = "--remindme"
     else:
@@ -309,11 +314,11 @@ def respondReminder(message):
     if remindTime.timestamp() < time.time():
         return;
 
-    writeText("Reminder set for %s, %s seconds from now."%(arg, remindTime.timestamp() - time.time()))
-    writeText("This is a reminder for %s"%arg, remindTime.timestamp() - time.time())
+    writeText("Reminder set for %s, %s seconds from now."%(arg, remindTime.timestamp() - time.time()), group)
+    writeText("This is a reminder for %s"%arg, group, remindTime.timestamp() - time.time())
 
 
-def respondStatus(message, metadata):
+def respondStatus(message, metadata, group):
     if "--status" in message:
         pattern = "--status"
     else:
@@ -325,9 +330,9 @@ def respondStatus(message, metadata):
         verbosity = 0
     verbosity = max(0,verbosity)
     metadata.update({"verbosity":verbosity})
-    sendStatus(metadata)
+    sendStatus(metadata, group)
 
-def respondEvang():
+def respondEvang(group):
     replacements = {
         "Jesus" : "Mouse Jesus",        "saints" : "murine saints",     "godliness" : "mousiness",
         "God" : "The Big Cheese",       "Jews" : "Rats",                "Jew" : "Rat",
@@ -369,9 +374,9 @@ def respondEvang():
     
     
     verse += '\n' + address
-    writeText(verse)
+    writeText(verse, group)
     
-def respondWeather():
+def respondWeather(group):
     url = "http://api.wunderground.com/api/" + weather_key + "/conditions/q/IA/Ames.json"
     r = requests.get(url)
     response = json.loads(r.text)["current_observation"]
@@ -381,9 +386,9 @@ def respondWeather():
     out += "Humidity: %s\n" % response["relative_humidity"]
     out += "Wind: %d mph (%d kph) %s\n" % (response["wind_mph"],response["wind_kph"],response["wind_dir"])
     out += "Windchill: %s\n" % response["windchill_string"]
-    writeText(out)
+    writeText(out, group)
 
-def respondShakespeare():
+def respondShakespeare(group):
     url = "http://www.pangloss.com/seidel/Shaker/index.html?"
     r = requests.get(url)
     page = r.text
@@ -393,9 +398,9 @@ def respondShakespeare():
     i1 = page.find(key1)
     i2 = page.find(key2)
     content = page[i1 + len(key1) : i2]
-    writeText(content)
+    writeText(content, group)
 
-def respondHoroscope(message):
+def respondHoroscope(message, group):
     if "--horoscope" in message:
         pattern = "--horoscope"
     else:
@@ -424,9 +429,9 @@ def respondHoroscope(message):
     horoscope = findclass[0].text_content()
     horoscope = "Horoscope for %s:\n" % sign     + horoscope
     
-    writeText(horoscope)
+    writeText(horoscope, group)
     
-def checkSender(senderid):
+def checkSender(senderid, group):
     if senderid == "29861221":
         arr = ["1.60934 kilometers",        "1609.34 meters",           "160934 centimeters",
                "1.609E6 millimeters",       "1760 yards","5280 feet",   "63360 inches",
@@ -434,33 +439,34 @@ def checkSender(senderid):
                "80 chains",                 "320 rods",                 "2.526E-4 Earth Radii",
                "1.076E-8 AU",               "1.701E-13 light years",    "5.216E-14 parsecs",
                "1.146E-26 Hubble lengths"]
-        writeText("Miles = %s" % arr[random.randrange(0,len(arr))])
+        text = "Miles = %s" % arr[random.randrange(0,len(arr))]
+        writeText(text, group)
 
-def parseText(message, metadata, sender):
+def parseText(message, metadata, sender, group):
     if NAME in message:
         arr = message.split()
         if "--help" in arr or "-h" in arr:
-            respondHelp(message);
+            respondHelp(message, group);
         if "--quote" in arr or "-q" in arr:
-            respondQuote(message)
+            respondQuote(message, group)
         if "--quiet" in arr or "-qu" in arr:
-            respondQuiet(message)
+            respondQuiet(message, group)
         if "--alive" in arr or "-a" in arr:
-            respondAlive()
+            respondAlive(group)
         if "--swear" in arr or "-sw" in arr:
-            respondSwearFilter(message)
+            respondSwearFilter(message, group)
         if "--remindme" in arr or "-rm" in arr:
-            respondReminder(message)
+            respondReminder(message, group)
         if "--status" in arr or "-s" in arr:
-            respondStatus(message, metadata)
+            respondStatus(message, metadata, group)
         if "--evangelize" in arr or "-evang" in arr:
-            respondEvang()
+            respondEvang(group)
         if "--weather" in arr or "-w" in arr:
-            respondWeather()
+            respondWeather(group)
         if "--shakespeare" in arr or "-shake" in arr:
-            respondShakespeare()
+            respondShakespeare(group)
         if "--horoscope" in arr or "-hor" in arr:
-            respondHoroscope(message)
-        checkSender(sender)
+            respondHoroscope(message, group)
+        checkSender(sender, group)
     else:
-        passMessage(message)
+        passMessage(message, group)

@@ -72,7 +72,7 @@ def process(response):
 
     status = {
         "id" : ID,
-        "reconnect_in": reconnect - int(connectTime),
+        "reconnect_in": reconnect - int(time.time()),
      	 "reconnect_at": reconnect,
         "lastConnected": connectTime,
         "started": startingTime,
@@ -80,7 +80,7 @@ def process(response):
         "upTime": time.time() - (startingTime + (errorCount * waitTime)),
         "message_counts": message_counts
     }
-    parseText(messageText, status, senderid)
+    parseText(messageText, status, senderid, groupid)
 
 sig = connect()
 startingTime = int(time.time())
@@ -95,7 +95,7 @@ while True:
             sig = connect()
             connectTime = int(time.time())
             reconnect = connectTime + 300
-        print("Polling %d..." % ID, end = ' ')
+        print("Polling %d..." % ID, end = ' ', flush = True)
         ret = poll(ID,sig)
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
