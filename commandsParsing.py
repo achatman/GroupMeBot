@@ -19,6 +19,10 @@ with open("options.json") as r:
 with open("bible.json") as r:
     bible = json.loads(r.readline())
 
+with open("bot.config") as r:
+    config = json.loads(r.readline())
+    weather_key = config["weather_key"]
+
 months = {
     1 : ["Jan", 31],
     2 : ["Feb", 28],
@@ -367,9 +371,7 @@ def respondEvang():
     writeText(verse)
     
 def respondWeather():
-    with open("weather.txt", mode = 'r') as r:
-        key = r.readline()
-    url = "http://api.wunderground.com/api/" + key + "/conditions/q/IA/Ames.json"
+    url = "http://api.wunderground.com/api/" + weather_key + "/conditions/q/IA/Ames.json"
     r = requests.get(url)
     response = json.loads(r.text)["current_observation"]
     out = "--Current Weather in Ames, IA--\n"
@@ -379,6 +381,18 @@ def respondWeather():
     out += "Wind: %d mph (%d kph) %s\n" % (response["wind_mph"],response["wind_kph"],response["wind_dir"])
     out += "Windchill: %s\n" % response["windchill_string"]
     writeText(out)
+
+def respondShakespeare():
+    url = "http://www.pangloss.com/seidel/Shaker/index.html?"
+    r = requests.get(url)
+    page = r.text
+    #Parsing manually, because the source html is shit
+    key1 = '<font size="+2">\n'
+    key2 = '</font>'
+    i1 = page.find(key1)
+    i2 = page.find(key2)
+    content = page[i1 + len(key1) : i2]
+    writeText(content)
     
 def checkSender(senderid):
     if senderid == "29861221":
@@ -392,23 +406,27 @@ def checkSender(senderid):
 
 def parseText(message, metadata, sender):
     if NAME in message:
-        if "--help" in message.split() or "-h" in message.split():
+        arr = message.split()
+        if "--help" in arr or "-h" in arr:
             respondHelp(message);
-        if "--quote" in message.split() or "-q" in message.split():
+        if "--quote" in arr or "-q" in arr:
             respondQuote(message)
-        if "--quiet" in message.split() or "-qu" in message.split():
+        if "--quiet" in arr or "-qu" in arr:
             respondQuiet(message)
-        if "--alive" in message.split() or "-a" in message.split():
+        if "--alive" in arr or "-a" in arr:
             respondAlive()
-        if "--swear" in message.split() or "-sw" in message.split():
+        if "--swear" in arr or "-sw" in arr:
             respondSwearFilter(message)
-        if "--remindme" in message.split() or "-rm" in message.split():
+        if "--remindme" in arr or "-rm" in arr:
             respondReminder(message)
-        if "--status" in message.split() or "-s" in message.split():
+        if "--status" in arr or "-s" in arr:
             respondStatus(message, metadata)
-        if "--evangelize" in message.split() or "-evang" in message.split():
+        if "--evangelize" in arr or "-evang" in arr:
             respondEvang()
-        if "--weather" in message.split() or "-w" in message.split():
+        if "--weather" in arr or "-w" in arr:
             respondWeather()
+        if "--shakespeare" in arr or "-shake" in arr:
+            respondShakespeare()
+        checkSender(sender)
     else:
         passMessage(message)

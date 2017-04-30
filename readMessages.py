@@ -99,11 +99,11 @@ while True:
         ret = poll(ID,sig)
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
-        reconnect = connectTime + int(timeout) / 1000
+        reconnect = time.time() + int(timeout) / 1000
         if ret[1]["data"]["type"] == "line.create":
             process(ret[1])
         elif ret[1]["data"]["type"] == "ping":
-            print("No event. Reconnect in: %s"%(reconnect - connectTime), flush = True)
+            print("No event. Reconnect in: %d"%(reconnect - time.time()), flush = True)
             countMessage("no_event")
         else:
             rettype = ret[1]["data"]["type"]
