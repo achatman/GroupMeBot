@@ -24,12 +24,9 @@ def handshake(ID):
         print("Handshake failed:", r.json()[0]["error"])
     else:
         print("Handshake successful.")
-    if(r.status_code != 200):
-        print("Handshake: ",r.status_code, r.reason)
-        print(json.dumps(r.json(),sort_keys=True, indent = 4))
     #returns signature
     #print(json.dumps(r.json(),indent = 4))
-    return r.json()[0]["clientId"]
+    return r.json()
     
 
 def userchannel(ID,sig):
@@ -51,10 +48,7 @@ def userchannel(ID,sig):
         print("Channel Subscription Failed:", r.json()[0]["error"])
     else:
         print("Subscribed to Channel")
-    #print(json.dumps(r.json(),indent = 4))
-    if(r.status_code != 200):
-        print("User Channel: ",r.status_code, r.reason)
-        print(json.dumps(r.json(),sort_keys=True, indent = 4))
+    return r.json()
 
 def poll(ID,sig):
     poll = [

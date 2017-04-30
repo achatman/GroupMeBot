@@ -18,6 +18,7 @@ from commandsParsing import parseText
 import time
 import json
 import requests
+import os
 
 with open("bot.config") as r:
     config = json.loads(r.readline())
@@ -28,6 +29,19 @@ with open("rude.json", mode = 'r') as r:
 
 ID = 1
 message_counts = {}
+logfiles = []
+
+
+def log(file, content):
+    path = os.path.join("logs",file + ".log")
+    if not os.path.isdir("logs"):
+        os.makedirs("logs")
+    if file not in logfiles:
+        with open(path, mode = 'w') as clear:
+            clear.write("")
+        logfiles.append(file)
+    with open(path, mode = 'a') as a:
+        a.write(content)
 
 def countMessage(message_type, count = 1):
     if message_type in message_counts:
@@ -37,9 +51,12 @@ def countMessage(message_type, count = 1):
 
 def connect():
     global ID;
-    sig = handshake(ID)
+    ret = handshake(ID)
+    log("handshake", json.dumps(ret, indent = 2) + ',\n')
+    sig = ret[0]["clientId"]
     ID += 1
-    userchannel(ID,sig)
+    ret = userchannel(ID,sig)
+    log("userchannel", json.dumps(ret, indent = 2) + ',\n')
     ID += 1
     return sig;
     
@@ -97,6 +114,7 @@ while True:
             reconnect = connectTime + 300
         print("Polling %d..." % ID, end = ' ', flush = True)
         ret = poll(ID,sig)
+        log("poll", json.dumps(ret, indent = 2) + ",\n")
         ID += 1
         timeout = ret[0]["advice"]["timeout"]
         reconnect = time.time() + int(timeout) / 1000
@@ -112,11 +130,12 @@ while True:
             
     except requests.exceptions.ConnectionError:
         print("Connection Error.", "Reconnecting in", end = ' ', flush = True)
-        errorCount += 1
-        ID += 1
         for i in range(0,3):
             print("%s seconds..."%int(waitTime - (i*waitTime/3)),end = ' ', flush = True)
-            #time.sleep(waitTime/3)
+            time.sleep(waitTime/3)
+        errorCount += 1
+        ID = 1
+        reconnect = -1
         print('')
     
 

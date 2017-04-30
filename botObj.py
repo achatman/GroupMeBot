@@ -22,6 +22,8 @@ class Bot(object):
         self.swear_switch = False
         
     def sendText(self,string):
+        if self.quiet_switch:
+            return "quiet";
         self.__strTypeCheck(string,"string")
         data = {
                 "bot_id": self.id,
@@ -33,7 +35,9 @@ class Bot(object):
             print(r.status_code, r.reason)
             print("Problematic text:", string)
             print("Respone text:", r.text)
-    
+            return "failed";
+        return "sent";
+    '''
     def sendImage(self,imageURL):
         self.__strTypeCheck(imageURL,"imageURL")
         data = {
@@ -166,3 +170,4 @@ class Bot(object):
             print("Longitude: " + lng)
             print("Latitude: " + lat)
             print("Name: " + name)
+    '''

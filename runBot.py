@@ -35,7 +35,8 @@ def swearSuggestion(message):
 
 lastModified = os.path.getmtime("actions.json") - 1
 actions = []
-loop_counter = 1200 #Starts high to create output immediately
+loop_status_interval = 300
+loop_start_time = time.time() - loop_status_interval #To create output immediately
 actions_executed = 0
 while(True):
     if os.path.getmtime("actions.json") > lastModified:
@@ -52,8 +53,10 @@ while(True):
         bot = BOTS[BOT_CONVERT[g["group_id"]]]
         if int(g["unix_time"]) < time.time():
             if g["type"] == "text":
-                if not bot.quiet_switch:
-                    bot.sendText(g["message"])
+                ret = bot.sendText(g["message"])
+                if ret == "quiet":
+                    print("Message not sent: quiet.")
+                elif ret == "sent":
                     print("Message sent.")
             if g["type"] == "flag":
                 if g["switch"] == "--quiet":
@@ -63,8 +66,13 @@ while(True):
                 print(g['switch'],g["direction"])
             if g["type"] == "pass":
                 if bot.swear_switch:
-                    bot.sendText(swearSuggestion(g["message"]))
-                    print("Cleaned message.")
+                    cleaned = swearSuggestion(g["message"])
+                    if cleaned != g["message"]:
+                        ret = bot.sendText(cleaned)
+                        if ret == "quiet":
+                            print("Cleaned message not sent: quiet.")
+                        elif ret == "sent":
+                            print("Cleaned message sent.")
             if g["type"] == "status":
                 out = "Actions Executed: %s\n" % actions_executed
                 out += "Actions Pending: %s\n" % (len(actions)-1) #-1 to ignore this action
@@ -83,12 +91,13 @@ while(True):
                     out += "Message Type Counts:\n"
                     for h in g["data"]["message_counts"]:
                         out += "**%s: %d\n" % (h,g["data"]["message_counts"][h])
-                bot.sendText(out)
-                print("Status Sent.")
+                ret = bot.sendText(out)
+                if ret == "quiet":
+                    print("Status not sent: quiet.")
+                elif ret == "sent":
+                    print("Status Sent.")
             actions_executed+=1
             actions.remove(g)
-    loop_counter+=1
-    if loop_counter > 60:
+    if time.time() - loop_start_time > loop_status_interval:
         print(time.ctime(),"Actions Executed: " + str(actions_executed),"Actions Pending: " + str(len(actions)), sep='; ')
-        loop_counter = 0
-    time.sleep(2)
+        loop_start_time = time.time()
