@@ -73,6 +73,10 @@ while(True):
                     out += "Reconnect in: %s\n" % g["data"]["reconnect_in"]
                     out += "Reconnect at: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["reconnect_at"]))
                     out += "Last Connected at: %s (UTC)\n" % time.asctime(time.localtime(g["data"]["lastConnected"]))
+                if g["data"]["verbosity"] > 2:
+                    out += "Message Type Counts:\n"
+                    for h in g["data"]["message_counts"]:
+                        out += "**%s: %d\n" % (h,g["data"]["message_counts"][h])
                 BOT.sendText(out)
                 print("Status Sent.")
             actions_executed+=1

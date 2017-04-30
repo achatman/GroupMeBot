@@ -9,8 +9,6 @@ with open("bot.config") as r:
     config = json.loads(r.readline())
     tok = config["token"]
     userID = config["user_id"]
-    
-tok = "vZwIgDi8R7DtFgzf4jPSUy6pxcFs0I6fLujahiv8"
 
 def handshake(ID):
     handshake = [
@@ -22,6 +20,10 @@ def handshake(ID):
         }
     ]
     r = requests.post(fayeURL, json = handshake)
+    if not r.json()[0]["successful"]:
+        print("Handshake failed:", r.json()[0]["error"])
+    else:
+        print("Handshake successful.")
     if(r.status_code != 200):
         print("Handshake: ",r.status_code, r.reason)
         print(json.dumps(r.json(),sort_keys=True, indent = 4))
@@ -45,6 +47,10 @@ def userchannel(ID,sig):
         }
     ]
     r = requests.post(fayeURL, json = userChannel)
+    if not r.json()[0]["successful"]:
+        print("Channel Subscription Failed:", r.json()[0]["error"])
+    else:
+        print("Subscribed to Channel")
     #print(json.dumps(r.json(),indent = 4))
     if(r.status_code != 200):
         print("User Channel: ",r.status_code, r.reason)

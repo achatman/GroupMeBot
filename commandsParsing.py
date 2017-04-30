@@ -364,8 +364,7 @@ def respondEvang():
     
     
     verse += '\n' + address
-    print(verse)
-    #writeText(verse)
+    writeText(verse)
     
 def respondWeather():
     with open("weather.txt", mode = 'r') as r:
