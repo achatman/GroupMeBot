@@ -11,6 +11,7 @@ import time
 import re
 import datetime
 import requests
+from lxml import html
 
 NAME = "Sarah"
 with open("options.json") as r:
@@ -338,7 +339,7 @@ def respondEvang():
         "Luke" : "Leopard Luke",        "Lamb": "Crumb",                "lamb": "crumb",
         "angel": "curd",                "Angel": "Curd",                "priest": "fromager",
         "Priest": "Fromager"
-}    
+    }    
     
     versesarr = []
     for g in bible:
@@ -393,6 +394,37 @@ def respondShakespeare():
     i2 = page.find(key2)
     content = page[i1 + len(key1) : i2]
     writeText(content)
+
+def respondHoroscope(message):
+    if "--horoscope" in message:
+        pattern = "--horoscope"
+    else:
+        pattern = "-hor"
+    arg = getArguments(message,pattern,1)[0]
+    hors = ["Aries", "Taurus", "Gemini",   "Sagittarius",
+            "Leo",   "Virgo",  "Cancer",   "Capricorn",
+            "Libra", "Pisces", "Aquarius", "Scorpio"]
+    sign = ''
+    for g in hors:
+        if arg.lower() in g.lower():
+            sign = g
+    
+    if sign == '' or arg == '':
+        sign = hors[random.randrange(0,len(hors))]
+    
+    #Get Horoscope
+    url = "https://www.astrology.com/horoscope/daily/" + sign.lower() + ".html"
+    r = requests.get(url)
+    page = html.document_fromstring(r.text)
+    findclass = page.find_class("page-horoscope-text")
+    #I can't be bothered to do any error handling on this right now
+    #so I'll just assume that this always works.
+    #This isn't the worst assumption, since this website probably won't
+    #change anytime soon.
+    horoscope = findclass[0].text_content()
+    horoscope = "Horoscope for %s:\n" % sign     + horoscope
+    
+    writeText(horoscope)
     
 def checkSender(senderid):
     if senderid == "29861221":
@@ -427,6 +459,8 @@ def parseText(message, metadata, sender):
             respondWeather()
         if "--shakespeare" in arr or "-shake" in arr:
             respondShakespeare()
+        if "--horoscope" in arr or "-hor" in arr:
+            respondHoroscope(message)
         checkSender(sender)
     else:
         passMessage(message)
