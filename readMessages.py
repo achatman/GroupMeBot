@@ -104,7 +104,7 @@ startingTime = int(time.time())
 connectTime = int(time.time())
 errorCount= 0
 reconnect = time.time() + 300
-waitTime = 30
+waitTime = 3
 
 while True:
     try:
