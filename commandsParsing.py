@@ -430,6 +430,34 @@ def respondHoroscope(message, group):
     horoscope = "Horoscope for %s:\n" % sign     + horoscope
     
     writeText(horoscope, group)
+
+def respondCompliment(group):
+    url = "http://www.complimentgenerator.co.uk/"
+    r = requests.get(url)
+    page = html.document_fromstring(r.text)
+    findclass = page.find_class("compliment" )
+    print(len(findclass))
+    comp = findclass[random.randrange(0,len(findclass))].text_content().strip()
+    
+    writeText(comp, group)
+
+def respondReasontoLive(group):
+    url = "https://www.brainyquote.com/quotes/keywords/live.html"
+    r = requests.get(url)
+    page = html.document_fromstring(r.text)
+    findclass = page.find_class("m-brick grid-item boxy bqQt")
+    quotes = []
+    for g in findclass:
+        element1 = g[0].text_content().strip()
+        element2 = g[1].text_content().strip()
+        if element1 == '':
+            element1 = element2
+            element2 =  g[2].text_content().strip()
+        quotes.append(element1 + '\n' + element2)
+        
+    quote = quotes[random.randrange(0,len(quotes))]
+    
+    writeText(quote, group)
     
 def checkSender(senderid, group):
     if senderid == "29861221":
@@ -467,6 +495,10 @@ def parseText(message, metadata, sender, group):
             respondShakespeare(group)
         if "--horoscope" in arr or "-hor" in arr:
             respondHoroscope(message, group)
+        if "--compliment" in arr or "-comp" in arr:
+            respondCompliment(group)
+        if "--reason-to-live" in arr or "-live" in arr:
+            respondReasontoLive(group)
         checkSender(sender, group)
     else:
         passMessage(message, group)
